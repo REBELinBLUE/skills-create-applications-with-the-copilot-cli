@@ -8,15 +8,22 @@
  *   - Subtraction (-)    : Subtracts the second number from the first
  *   - Multiplication (*) : Multiplies two numbers together
  *   - Division (/)       : Divides the first number by the second (handles division by zero)
+ *   - Modulo (%)         : Returns the remainder of the first number divided by the second
+ *   - Power (**)         : Raises the first number to the power of the second
+ *   - Square Root (sqrt) : Returns the square root of a single number (no second operand)
  *
  * Usage:
  *   node calculator.js <number> <operator> <number>
+ *   node calculator.js sqrt <number>
  *
  * Examples:
- *   node calculator.js 10 + 5   => 15
- *   node calculator.js 10 - 3   => 7
- *   node calculator.js 4 * 7    => 28
- *   node calculator.js 20 / 4   => 5
+ *   node calculator.js 10 + 5     => 15
+ *   node calculator.js 10 - 3     => 7
+ *   node calculator.js 4 * 7      => 28
+ *   node calculator.js 20 / 4     => 5
+ *   node calculator.js 10 % 3     => 1
+ *   node calculator.js 2 ** 8     => 256
+ *   node calculator.js sqrt 9     => 3
  */
 
 /** Addition: returns the sum of a and b */
@@ -42,9 +49,27 @@ function divide(a, b) {
   return a / b;
 }
 
+/** Modulo: returns the remainder of a divided by b */
+function modulo(a, b) {
+  return a % b;
+}
+
+/** Power: returns base raised to the power of exponent */
+function power(base, exponent) {
+  return base ** exponent;
+}
+
+/** Square Root: returns the square root of n; throws for negative inputs */
+function squareRoot(n) {
+  if (n < 0) {
+    throw new Error('Square root of a negative number is not allowed.');
+  }
+  return Math.sqrt(n);
+}
+
 /**
- * Evaluates an expression given two operands and an operator string (+, -, *, /).
- * Throws on unsupported operators or division by zero.
+ * Evaluates an expression given two operands and an operator string (+, -, *, /, %, **).
+ * Throws on unsupported operators or invalid inputs.
  */
 function calculate(a, operator, b) {
   switch (operator) {
@@ -52,20 +77,39 @@ function calculate(a, operator, b) {
     case '-': return subtract(a, b);
     case '*': return multiply(a, b);
     case '/': return divide(a, b);
+    case '%': return modulo(a, b);
+    case '**': return power(a, b);
     default:
-      throw new Error(`Unsupported operator "${operator}". Use +, -, *, or /.`);
+      throw new Error(`Unsupported operator "${operator}". Use +, -, *, /, %, or **.`);
   }
 }
 
-module.exports = { add, subtract, multiply, divide, calculate };
+module.exports = { add, subtract, multiply, divide, modulo, power, squareRoot, calculate };
 
 // Run as CLI only when executed directly
 if (require.main === module) {
   const args = process.argv.slice(2);
 
+  // Handle: node calculator.js sqrt <number>
+  if (args.length === 2 && args[0] === 'sqrt') {
+    const n = parseFloat(args[1]);
+    if (isNaN(n)) {
+      console.error('Error: Operand must be a valid number.');
+      process.exit(1);
+    }
+    try {
+      console.log(`sqrt(${n}) = ${squareRoot(n)}`);
+    } catch (err) {
+      console.error(`Error: ${err.message}`);
+      process.exit(1);
+    }
+    process.exit(0);
+  }
+
   if (args.length !== 3) {
     console.error('Usage: node calculator.js <number> <operator> <number>');
-    console.error('Operators: + - * /');
+    console.error('       node calculator.js sqrt <number>');
+    console.error('Operators: + - * / % **');
     process.exit(1);
   }
 
